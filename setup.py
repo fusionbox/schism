@@ -23,4 +23,7 @@ setup(name='schism',
       license='MIT',
       packages=['schism'],
       scripts=['bin/schism'],
+      install_requires=[
+          'pyyaml==3.10',
+      ],
       zip_safe=False)
