@@ -1,21 +1,16 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
+
+from schism import Config
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Sets and configures webfaction sites with xmlrpc.',
+        description='Sets up and configures webfaction sites over xmlrpc.',
     )
-    #parser.add_argument('git_path', metavar='<git_path>', help='Path to git repository.')
-    #parser.add_argument('mount_path', metavar='<mount_path>', help='Path to mount point.')
-
-    #if len(sys.argv) != 3:
-        #parser.print_help()
-        #sys.exit(0)
-
-    #logging.getLogger().setLevel(logging.DEBUG)
+    parser.add_argument('config_path', help='path to site configuration yaml file')
 
     args = parser.parse_args()
-    #fuse = FUSE(GitFS(args.git_path), args.mount_path, foreground=True, debug=True)
+
+    config = Config(args.config_path)
