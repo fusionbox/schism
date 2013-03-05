@@ -16,5 +16,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    session = Account(args.config_path)
-    session.provision()
+    account = Account(args.config_path)
+    account.provision()
