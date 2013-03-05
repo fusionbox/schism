@@ -4,10 +4,7 @@ from .resources import RESOURCES
 
 class Settings(dict):
     """
-    Used for working with setting dicts for specific resource types.  If one
-    attempts to access a required key that is not found, raises an exception
-    with a descriptive error message.  Returns ``None`` if an optional key is
-    not found.
+    Used for working with setting dicts for specific resource types.
     """
     def __init__(self, d, name, resource):
         super(Settings, self).__init__(d)
@@ -17,6 +14,11 @@ class Settings(dict):
         self._required_settings = RESOURCES[resource]['required_settings']
 
     def __getitem__(self, key):
+        """
+        If one attempts to access a required key that is not found, raises an
+        exception with a descriptive error message.  Returns ``None`` if an
+        optional key is not found.
+        """
         try:
             return super(Settings, self).__getitem__(key)
         except KeyError:
