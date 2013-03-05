@@ -15,6 +15,7 @@ RESOURCES = {
     'website': {
         'verbose_name': 'website',
         'verbose_name_plural': 'websites',
+        'required_settings': ('ip', 'https', 'subdomains'),
     },
     'domain': {
         'verbose_name': 'domain',

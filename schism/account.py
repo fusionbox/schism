@@ -82,25 +82,46 @@ class Account(object):
         # Create applications
         if not self._config.get('applications'):
             log('no applications specified...skipping <!>\n')
+        else:
+            for app_name, app_settings in self._config['applications'].iteritems():
+                settings = Settings(app_settings, name=app_name, resource='app')
 
-        for app_name, app_settings in self._config['applications'].iteritems():
-            settings = Settings(app_settings, name=app_name, resource='app')
+                app_type = settings['type']
 
-            app_type = settings['type']
-
-            self.create_app(app_name, app_type)
+                self.create_app(app_name, app_type)
 
         # Create databases
         if not self._config.get('databases'):
             log('no databases specified...skipping <!>\n')
+        else:
+            for db_name, db_settings in self._config['databases'].iteritems():
+                settings = Settings(db_settings, name=db_name, resource='db')
 
-        for db_name, db_settings in self._config['databases'].iteritems():
-            settings = Settings(db_settings, name=db_name, resource='db')
+                db_type = settings['type']
+                db_password = settings['password']
 
-            db_type = settings['type']
-            db_password = settings['password']
+                self.create_db(db_name, db_type, db_password)
 
-            self.create_db(db_name, db_type, db_password)
+        # Create websites
+        if not self._config.get('websites'):
+            log('no websites specified...skipping <!>\n')
+        else:
+            for website_name, website_settings in self._config['websites'].iteritems():
+                settings = Settings(website_settings, name=website_name, resource='website')
+
+                website_ip = settings['ip']
+                website_https = settings['https']
+                website_subdomains = settings['subdomains']
+                website_site_apps = settings['site_apps']
+
+                self.create_website(
+                    website_name,
+                    website_ip,
+                    website_https,
+                    website_subdomains,
+                    website_site_apps,
+                )
+
     @require_unique
     def create_domain(self, domain):
         log(
@@ -127,3 +148,18 @@ class Account(object):
             type,
             password,
         )
+
+    @require_unique
+    def create_website(self, name, ip, https, subdomains, site_apps=None):
+        args = [
+            'creating "{name}" website'.format(name=name),
+            self._server.create_website,
+            name,
+            ip,
+            https,
+            subdomains,
+        ]
+        if site_apps:
+            args += site_apps
+
+        log(*args)
