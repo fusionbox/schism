@@ -181,17 +181,17 @@ class Account(object):
     def create_app(self, name, type, autostart=False):
         log(
             'creating "{name}" application with type "{type}"'.format(name=name, type=type),
-            #self._server.create_app,
-            #name,
-            #type,
+            self._server.create_app,
+            name,
+            type,
         )
 
     @require_unique
     def create_db(self, name, type, password):
         log(
             'creating "{name}" database with type "{type}"'.format(name=name, type=type),
-            #self._server.create_db,
-            #name,
-            #type,
-            #password,
+            self._server.create_db,
+            name,
+            type,
+            password,
         )
