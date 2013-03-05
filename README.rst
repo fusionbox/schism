@@ -2,7 +2,7 @@
 schism
 ======
 
-Setup and configure webfaction site with xmlrpc.
+Setup and configure webfaction sites with xmlrpc.
 
 License
 =======
