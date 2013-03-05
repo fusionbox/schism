@@ -1,3 +1,6 @@
+"""
+Describes all resource types available through the webfaction API.
+"""
 RESOURCES = {
     'app': {
         'verbose_name': 'application',
