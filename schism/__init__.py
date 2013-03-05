@@ -150,10 +150,10 @@ class Account(object):
         return not (name in [r['name'] for r in self._cache[resource]])
 
     def provision(self):
+        # Create applications
         if not self._config.get('applications'):
             log('no applications specified...skipping <!>\n')
 
-        # Create applications
         for app_name, app_options in self._config['applications'].iteritems():
             options = Options(
                 app_options,
@@ -165,17 +165,20 @@ class Account(object):
             app_type = options['type']
             self.create_app(app_name, app_type)
 
-        ## Create databases
-        #for db_name, db_options in self._dbs.iteritems():
-            #options = Options(
-                #db_options,
-                #resource_name=db_name,
-                #resource_type='database',
-                #required=('type', 'password'),
-            #)
+        # Create databases
+        if not self._config.get('databases'):
+            log('no databases specified...skipping <!>\n')
 
-            #db_type = options['type']
-            #self.create_db(db_name, db_type)
+        for db_name, db_options in self._config['databases'].iteritems():
+            options = Options(
+                db_options,
+                resource_name=db_name,
+                resource_type='database',
+                required=('type',),
+            )
+
+            db_type = options['type']
+            self.create_db(db_name, db_type)
 
     @require_unique
     def create_app(self, name, type, autostart=False):
