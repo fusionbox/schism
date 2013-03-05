@@ -46,6 +46,10 @@ CREATION_METHOD_RE = re.compile(r'^create_(.*)$')
 
 
 def require_unique(old_fn):
+    """
+    Decorates a resource creation method to require that the name of the
+    resource being created is unique.
+    """
     @functools.wraps(old_fn)
     def new_fn(self, *args, **kwargs):
         # Detect resource type
@@ -74,7 +78,7 @@ class SchismError(Exception):
 
 class Server(object):
     """
-    A wrapper class for connecting and making calls to the webfaction API.
+    A wrapper class for connecting to and making calls to the webfaction API.
     """
     WEBFACTION_API_URL = 'https://api.webfaction.com/'
 
