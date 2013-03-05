@@ -42,14 +42,14 @@ def log(message, func=None, *args, **kwargs):
         return value
 
 
-require_unique_re = re.compile(r'^create_(.*)$')
+CREATION_METHOD_RE = re.compile(r'^create_(.*)$')
 
 
 def require_unique(old_fn):
     @functools.wraps(old_fn)
     def new_fn(self, *args, **kwargs):
         # Detect resource type
-        resource = require_unique_re.search(old_fn.func_name).group(1)
+        resource = CREATION_METHOD_RE.search(old_fn.func_name).group(1)
         verbose_name = RESOURCES[resource]['verbose_name']
 
         name = args[0]
