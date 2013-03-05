@@ -1,5 +1,5 @@
 from .exceptions import SchismError
-from .resource import RESOURCES
+from .resources import RESOURCES
 
 
 class Settings(dict):
