@@ -2,15 +2,19 @@
 
 import argparse
 
-from schism import Config
+from schism import Account
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Sets up and configures webfaction sites over xmlrpc.',
     )
-    parser.add_argument('config_path', help='path to site configuration yaml file')
+    parser.add_argument(
+        'config_path',
+        help='path to site configuration yaml file',
+    )
 
     args = parser.parse_args()
 
-    config = Config(args.config_path)
+    session = Account(args.config_path)
+    session.provision()
