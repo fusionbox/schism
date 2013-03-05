@@ -8,7 +8,7 @@ def readme():
 
 setup(name='schism',
       version='0.1',
-      description='Setup and configure webfaction sites with xmlrpc.',
+      description='Setup and configure webfaction sites over xmlrpc.',
       long_description=readme(),
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -16,7 +16,7 @@ setup(name='schism',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 2.7',
       ],
-      keywords='webfaction xmlrpc configuration setup',
+      keywords='webfaction api xmlrpc automatic configuration setup',
       url='https://github.com/davesque/schism',
       author='David Sanders',
       author_email='davesque@gmail.com',
