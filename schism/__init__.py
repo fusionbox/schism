@@ -97,29 +97,29 @@ class Server(object):
         return functools.partial(procedure, self._session_id)
 
 
-class Options(dict):
+class Settings(dict):
     """
-    Used for working with resource setting dicts.  Allows the specification of
-    required settings (dictionary keys).  If one attempts to access a required
-    key that is not found, raises an exception with a descriptive error
-    message.  Returns ``None`` if a non-required key is not found.
+    Used for working with setting dicts for specific resource types.  If one
+    attempts to access a required key that is not found, raises an exception
+    with a descriptive error message.  Returns ``None`` if an optional key is
+    not found.
     """
-    def __init__(self, d, resource_name, resource_type, required=None):
-        super(Options, self).__init__(d)
+    def __init__(self, d, name, resource):
+        super(Settings, self).__init__(d)
 
-        self._resource_name = resource_name
-        self._resource_type = resource_type
-        self._required = required
+        self._name = name
+        self._verbose_name = RESOURCES[resource]['verbose_name']
+        self._required_settings = RESOURCES[resource]['required_settings']
 
     def __getitem__(self, key):
         try:
-            return super(Options, self).__getitem__(key)
+            return super(Settings, self).__getitem__(key)
         except KeyError:
-            if key in self._required:
-                raise SchismError('Required "{key}" setting not specified for "{resource_name}" {resource_type}'.format(
+            if key in self._required_settings:
+                raise SchismError('Required "{key}" setting not found for "{name}" {verbose_name}'.format(
                     key=key,
-                    resource_type=self._resource_type,
-                    resource_name=self._resource_name,
+                    verbose_name=self._verbose_name,
+                    name=self._name,
                 ))
             else:
                 return None
@@ -160,31 +160,21 @@ class Account(object):
         if not self._config.get('applications'):
             log('no applications specified...skipping <!>\n')
 
-        for app_name, app_options in self._config['applications'].iteritems():
-            options = Options(
-                app_options,
-                resource_name=app_name,
-                resource_type='application',
-                required=('type',),
-            )
+        for app_name, app_settings in self._config['applications'].iteritems():
+            settings = Settings(app_settings, name=app_name, resource='app')
 
-            app_type = options['type']
+            app_type = settings['type']
             self.create_app(app_name, app_type)
 
-        # Create databases
-        if not self._config.get('databases'):
-            log('no databases specified...skipping <!>\n')
+        ## Create databases
+        #if not self._config.get('databases'):
+            #log('no databases specified...skipping <!>\n')
 
-        for db_name, db_options in self._config['databases'].iteritems():
-            options = Options(
-                db_options,
-                resource_name=db_name,
-                resource_type='database',
-                required=('type',),
-            )
+        #for db_name, db_settings in self._config['databases'].iteritems():
+            #settings = Settings(db_settings, name=db_name, resource='db')
 
-            db_type = options['type']
-            self.create_db(db_name, db_type)
+            #db_type = settings['type']
+            #self.create_db(db_name, db_type)
 
     @require_unique
     def create_app(self, name, type, autostart=False):
@@ -195,12 +185,12 @@ class Account(object):
             type,
         )
 
-    @require_unique
-    def create_db(self, name, type, password):
-        log(
-            'creating "{name}" database with type "{type}"'.format(name=name, type=type),
-            self._server.create_db,
-            name,
-            type,
-            password,
-        )
+    #@require_unique
+    #def create_db(self, name, type, password):
+        #log(
+            #'creating "{name}" database with type "{type}"'.format(name=name, type=type),
+            #self._server.create_db,
+            #name,
+            #type,
+            #password,
+        #)
