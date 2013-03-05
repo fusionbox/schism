@@ -79,15 +79,15 @@ class Account(object):
             app_type = settings['type']
             self.create_app(app_name, app_type)
 
-        ## Create databases
-        #if not self._config.get('databases'):
-            #log('no databases specified...skipping <!>\n')
+        # Create databases
+        if not self._config.get('databases'):
+            log('no databases specified...skipping <!>\n')
 
-        #for db_name, db_settings in self._config['databases'].iteritems():
-            #settings = Settings(db_settings, name=db_name, resource='db')
+        for db_name, db_settings in self._config['databases'].iteritems():
+            settings = Settings(db_settings, name=db_name, resource='db')
 
-            #db_type = settings['type']
-            #self.create_db(db_name, db_type)
+            db_type = settings['type']
+            self.create_db(db_name, db_type)
 
     @require_unique
     def create_app(self, name, type, autostart=False):
@@ -98,12 +98,12 @@ class Account(object):
             type,
         )
 
-    #@require_unique
-    #def create_db(self, name, type, password):
-        #log(
-            #'creating "{name}" database with type "{type}"'.format(name=name, type=type),
-            #self._server.create_db,
-            #name,
-            #type,
-            #password,
-        #)
+    @require_unique
+    def create_db(self, name, type, password):
+        log(
+            'creating "{name}" database with type "{type}"'.format(name=name, type=type),
+            self._server.create_db,
+            name,
+            type,
+            password,
+        )
