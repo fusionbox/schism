@@ -66,9 +66,19 @@ class Account(object):
         """
         Determines if a name for a given resource is unique.
         """
-        return not (name in [r['name'] for r in self._cache[resource]])
+        if resource == 'domain':
+            return not (name in [r['domain'] for r in self._cache[resource]])
+        else:
+            return not (name in [r['name'] for r in self._cache[resource]])
 
     def provision(self):
+        # Create domains
+        if not self._config.get('domains'):
+            log('no domains specified...skipping <!>\n')
+        else:
+            for domain in self._config['domains']:
+                self.create_domain(domain)
+
         # Create applications
         if not self._config.get('applications'):
             log('no applications specified...skipping <!>\n')
@@ -91,6 +101,13 @@ class Account(object):
             db_password = settings['password']
 
             self.create_db(db_name, db_type, db_password)
+    @require_unique
+    def create_domain(self, domain):
+        log(
+            'creating "{domain}" domain'.format(domain=domain),
+            self._server.create_domain,
+            domain,
+        )
 
     @require_unique
     def create_app(self, name, type, autostart=False):
