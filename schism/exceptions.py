@@ -1,0 +1,2 @@
+class SchismError(Exception):
+    pass
