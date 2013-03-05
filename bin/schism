@@ -11,7 +11,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         'config_path',
-        help='path to site configuration yaml file',
+        help='path to configuration yaml file',
     )
 
     args = parser.parse_args()
