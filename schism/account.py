@@ -77,6 +77,7 @@ class Account(object):
             settings = Settings(app_settings, name=app_name, resource='app')
 
             app_type = settings['type']
+
             self.create_app(app_name, app_type)
 
         # Create databases
@@ -87,7 +88,9 @@ class Account(object):
             settings = Settings(db_settings, name=db_name, resource='db')
 
             db_type = settings['type']
-            self.create_db(db_name, db_type)
+            db_password = settings['password']
+
+            self.create_db(db_name, db_type, db_password)
 
     @require_unique
     def create_app(self, name, type, autostart=False):
