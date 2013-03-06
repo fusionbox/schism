@@ -11,31 +11,42 @@ from .utils import log
 CREATION_METHOD_RE = re.compile(r'^create_(.*)$')
 
 
-def require_unique(old_fn):
+def require_unique(or_do=None):
     """
-    Decorates a resource creation method to require that the name of the
-    resource being created is unique.
+    Returns a decorator that decorates a resource creation method to require
+    that the name of the resource being created is unique.  An alternative
+    method may be specified using ``or_do`` which will be called if the name is
+    not unique.
     """
-    @functools.wraps(old_fn)
-    def new_fn(self, *args, **kwargs):
-        # Detect resource type
-        resource = CREATION_METHOD_RE.search(old_fn.func_name).group(1)
-        verbose_name = RESOURCES[resource]['verbose_name']
+    def decorator(old_fn):
+        @functools.wraps(old_fn)
+        def new_fn(self, *args, **kwargs):
+            # Detect resource type
+            resource = CREATION_METHOD_RE.search(old_fn.func_name).group(1)
+            verbose_name = RESOURCES[resource]['verbose_name']
 
-        name = args[0]
+            name = args[0]
 
-        # If resource name not unique, abort
-        if not self._is_unique(resource, name):
-            log('{verbose_name} with name "{name}" already exists...skipping <!>\n'.format(
-                verbose_name=verbose_name,
-                name=name,
-                ))
-            return
-        # Otherwise, run decorated function
-        else:
-            old_fn(self, *args, **kwargs)
+            # If resource name not unique, abort
+            if not self._is_unique(resource, name):
+                log('{verbose_name} with name "{name}" already exists...'.format(
+                    verbose_name=verbose_name,
+                    name=name,
+                    ))
 
-    return new_fn
+                if or_do:
+                    return or_do(self, *args, **kwargs)
+                else:
+                    log('skipping <!>\n')
+                    return
+
+            # Otherwise, run decorated function
+            else:
+                return old_fn(self, *args, **kwargs)
+
+        return new_fn
+
+    return decorator
 
 
 class Account(object):
@@ -122,7 +133,7 @@ class Account(object):
                     website_site_apps,
                 )
 
-    @require_unique
+    @require_unique()
     def create_domain(self, domain):
         log(
             'creating "{domain}" domain'.format(domain=domain),
@@ -130,7 +141,7 @@ class Account(object):
             domain,
         )
 
-    @require_unique
+    @require_unique()
     def create_app(self, name, type, autostart=False):
         log(
             'creating "{name}" application with type "{type}"'.format(name=name, type=type),
@@ -139,7 +150,7 @@ class Account(object):
             type,
         )
 
-    @require_unique
+    @require_unique()
     def create_db(self, name, type, password):
         log(
             'creating "{name}" database with type "{type}"'.format(name=name, type=type),
@@ -149,7 +160,21 @@ class Account(object):
             password,
         )
 
-    @require_unique
+    def update_website(self, name, ip, https, subdomains, site_apps=None):
+        args = [
+            'updating "{name}" website'.format(name=name),
+            self._server.update_website,
+            name,
+            ip,
+            https,
+            subdomains,
+        ]
+        if site_apps:
+            args += site_apps
+
+        log(*args)
+
+    @require_unique(or_do=update_website)
     def create_website(self, name, ip, https, subdomains, site_apps=None):
         args = [
             'creating "{name}" website'.format(name=name),
