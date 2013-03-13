@@ -97,17 +97,6 @@ class Account(object):
             for domain in self._config['domains']:
                 self.create_domain(domain)
 
-        # Create applications
-        if not self._config.get('applications'):
-            log('no applications specified...skipping <!>\n')
-        else:
-            for app_name, app_settings in self._config['applications'].iteritems():
-                settings = Settings(app_settings, name=app_name, resource='app')
-
-                app_type = settings['type']
-
-                self.create_app(app_name, app_type)
-
         # Create databases
         if not self._config.get('databases'):
             log('no databases specified...skipping <!>\n')
@@ -119,6 +108,17 @@ class Account(object):
                 db_password = settings['password']
 
                 self.create_db(db_name, db_type, db_password)
+
+        # Create applications
+        if not self._config.get('applications'):
+            log('no applications specified...skipping <!>\n')
+        else:
+            for app_name, app_settings in self._config['applications'].iteritems():
+                settings = Settings(app_settings, name=app_name, resource='app')
+
+                app_type = settings['type']
+
+                self.create_app(app_name, app_type)
 
         # Create websites
         if not self._config.get('websites'):
@@ -179,15 +179,6 @@ class Account(object):
         )
 
     @require_unique()
-    def create_app(self, name, type, autostart=False):
-        log(
-            'creating "{name}" application with type "{type}"'.format(name=name, type=type),
-            self._server.create_app,
-            name,
-            type,
-        )
-
-    @require_unique()
     def create_db(self, name, type, password):
         log(
             'creating "{name}" database with type "{type}"'.format(name=name, type=type),
@@ -195,6 +186,15 @@ class Account(object):
             name,
             type,
             password,
+        )
+
+    @require_unique()
+    def create_app(self, name, type, autostart=False):
+        log(
+            'creating "{name}" application with type "{type}"'.format(name=name, type=type),
+            self._server.create_app,
+            name,
+            type,
         )
 
     def update_website(self, name, ip, https, subdomains, site_apps=None):
