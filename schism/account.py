@@ -140,6 +140,17 @@ class Account(object):
                     website_site_apps,
                 )
 
+        # Configure crontab
+        cronjobs = self._config.get('cronjobs')
+        if cronjobs:
+            cronjobs_present = cronjobs.get('present', [])
+            cronjobs_purge = cronjobs.get('purge', [])
+
+            for line in cronjobs_present:
+                self.create_cronjob(line)
+            for line in cronjobs_purge:
+                self.delete_cronjob(line)
+
         # Execute system commands
         if self._config.get('system'):
             for cmd in self._config['system']:
@@ -230,6 +241,15 @@ class Account(object):
             args += site_apps
 
         log(*args)
+
+    def create_cronjob(self, line):
+        log('ensuring present in crontab:\n{line}\n'.format(line=line))
+        self._server.delete_cronjob(line)
+        self._server.create_cronjob(line)
+
+    def delete_cronjob(self, line):
+        log('purging from crontab:\n{line}\n'.format(line=line))
+        self._server.delete_cronjob(line)
 
     def system(self, cmd):
         normalized = 'cd ~/ && {0}'.format(cmd)
