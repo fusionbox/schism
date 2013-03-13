@@ -1,5 +1,7 @@
 import functools
+import os
 import re
+import xmlrpclib
 import yaml
 
 from .resources import RESOURCES
@@ -83,6 +85,11 @@ class Account(object):
             return not (name in [r['name'] for r in self._cache[resource]])
 
     def provision(self):
+        # Upload files
+        if self._config.get('files'):
+            for local_path, remote_path in self._config['files'].iteritems():
+                self.write_file(remote_path, local_path)
+
         # Create domains
         if not self._config.get('domains'):
             log('no domains specified...skipping <!>\n')
@@ -132,6 +139,36 @@ class Account(object):
                     website_subdomains,
                     website_site_apps,
                 )
+
+    def write_file(self, remote_path, local_path, mode='wb'):
+        with open(os.path.join('files', local_path), 'rb') as f:
+            content = f.read()
+
+        try:
+            self._server.system('ls ~/{0}'.format(remote_path))
+        except xmlrpclib.Fault as e:
+            if 'No such file' not in e.faultString:
+                raise
+
+            # No such file.  Create its directory and continue.
+            dir_path = remote_path.rsplit('/', 1)
+            if len(dir_path) == 2:
+                self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
+        else:
+            if raw_input('Remote file ~/{0} already exists.  Overwrite?  (Y/n) '.format(remote_path)) != 'Y':
+                log('Skipping...\n')
+                return
+
+        log(
+            'copying local://{local_path} -> remote://{remote_path}'.format(
+                local_path=local_path,
+                remote_path=remote_path,
+            ),
+            self._server.write_file,
+            remote_path,
+            content,
+            mode,
+        )
 
     @require_unique()
     def create_domain(self, domain):
