@@ -140,6 +140,11 @@ class Account(object):
                     website_site_apps,
                 )
 
+        # Execute system commands
+        if self._config.get('system'):
+            for cmd in self._config['system']:
+                self.system(cmd)
+
     def write_file(self, remote_path, local_path, mode='wb'):
         with open(os.path.join('files', local_path), 'rb') as f:
             content = f.read()
@@ -225,3 +230,10 @@ class Account(object):
             args += site_apps
 
         log(*args)
+
+    def system(self, cmd):
+        normalized = 'cd ~/ && {0}'.format(cmd)
+
+        log('executing: {cmd}\n'.format(cmd=cmd))
+        out = self._server.system(normalized)
+        log('out:\n{out}\n'.format(out=out))
