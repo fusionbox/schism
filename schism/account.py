@@ -160,13 +160,15 @@ class Account(object):
         with open(os.path.join('files', local_path), 'rb') as f:
             content = f.read()
 
+        # Some juggling to warn about overwriting files
         try:
             self._server.system('ls ~/{0}'.format(remote_path))
         except xmlrpclib.Fault as e:
+            # Pass any other errors through
             if 'No such file' not in e.faultString:
                 raise
 
-            # No such file.  Create its directory and continue.
+            # Otherwise, no such file.  Create parent directories and continue.
             dir_path = remote_path.rsplit('/', 1)
             if len(dir_path) == 2:
                 self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
