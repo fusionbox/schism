@@ -144,11 +144,11 @@ class Account(object):
         cronjobs = self._config.get('cronjobs')
         if cronjobs:
             cronjobs_present = cronjobs.get('present', [])
-            cronjobs_purge = cronjobs.get('purge', [])
+            cronjobs_purged = cronjobs.get('purged', [])
 
             for line in cronjobs_present:
                 self.create_cronjob(line)
-            for line in cronjobs_purge:
+            for line in cronjobs_purged:
                 self.delete_cronjob(line)
 
         # Execute system commands
