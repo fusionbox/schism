@@ -174,11 +174,11 @@ class Account(object):
                 self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
         else:
             if raw_input('Remote file ~/{0} already exists.  Overwrite?  (Y/n) '.format(remote_path)) != 'Y':
-                log('Skipping...\n')
+                log('skipping...\n')
                 return
 
         log(
-            'copying local://{local_path} -> remote://{remote_path}'.format(
+            'copying local:{local_path} -> webfaction:~/{remote_path} '.format(
                 local_path=local_path,
                 remote_path=remote_path,
             ),
@@ -258,4 +258,4 @@ class Account(object):
 
         log('executing: {cmd}\n'.format(cmd=cmd))
         out = self._server.system(normalized)
-        log('out:\n{out}\n'.format(out=out))
+        log('out: {out}\n'.format(out=out))
