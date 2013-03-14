@@ -144,11 +144,11 @@ class Account(object):
         cronjobs = self._config.get('cronjobs')
         if cronjobs:
             cronjobs_present = cronjobs.get('present', [])
-            cronjobs_purge = cronjobs.get('purge', [])
+            cronjobs_purged = cronjobs.get('purged', [])
 
             for line in cronjobs_present:
                 self.create_cronjob(line)
-            for line in cronjobs_purge:
+            for line in cronjobs_purged:
                 self.delete_cronjob(line)
 
         # Execute system commands
@@ -160,23 +160,25 @@ class Account(object):
         with open(os.path.join('files', local_path), 'rb') as f:
             content = f.read()
 
+        # Some juggling to warn about overwriting files
         try:
             self._server.system('ls ~/{0}'.format(remote_path))
         except xmlrpclib.Fault as e:
+            # Pass any other errors through
             if 'No such file' not in e.faultString:
                 raise
 
-            # No such file.  Create its directory and continue.
+            # Otherwise, no such file.  Create parent directories and continue.
             dir_path = remote_path.rsplit('/', 1)
             if len(dir_path) == 2:
                 self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
         else:
             if raw_input('Remote file ~/{0} already exists.  Overwrite?  (Y/n) '.format(remote_path)) != 'Y':
-                log('Skipping...\n')
+                log('skipping...\n')
                 return
 
         log(
-            'copying local://{local_path} -> remote://{remote_path}'.format(
+            'copying local:{local_path} -> webfaction:~/{remote_path} '.format(
                 local_path=local_path,
                 remote_path=remote_path,
             ),
@@ -256,4 +258,4 @@ class Account(object):
 
         log('executing: {cmd}\n'.format(cmd=cmd))
         out = self._server.system(normalized)
-        log('out:\n{out}\n'.format(out=out))
+        log('out: {out}\n'.format(out=out))
