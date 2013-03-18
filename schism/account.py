@@ -273,4 +273,5 @@ class Account(object):
 
         log('Executing: {cmd}\n'.format(cmd=cmd))
         out = self._server.system(normalized)
-        log('Out: {out}\n'.format(out=out))
+        if out.strip():
+            log('Out: {out}\n'.format(out=out))
