@@ -188,7 +188,7 @@ class Account(object):
             if len(dir_path) == 2:
                 self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
         else:
-            if raw_input('Remote file ~/{0} already exists.  Overwrite?  (Y/n) '.format(remote_path)) != 'Y':
+            if raw_input('Remote file ~/{0} already exists. Overwrite? (Y/n) '.format(remote_path)) != 'Y':
                 log('skipping...\n')
                 return
 
