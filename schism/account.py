@@ -12,6 +12,17 @@ from .utils import log
 
 CREATION_METHOD_RE = re.compile(r'^create_(.*)$')
 
+valid_tasks = []
+
+
+def task(fn):
+    """
+    Decorator adds function to an array of valid schism tasks for cli task
+    argument validation.
+    """
+    valid_tasks.append(fn)
+    return fn
+
 
 def require_unique(or_do=None):
     """
@@ -53,7 +64,9 @@ def require_unique(or_do=None):
 
 
 class Account(object):
-    def __init__(self, path):
+    def __init__(self, path, run_system=False):
+        self._run_system = run_system
+
         # Open and load yaml config
         with open(path, 'r') as f:
             c = yaml.load(f.read())
@@ -85,6 +98,7 @@ class Account(object):
         else:
             return not (name in [r['name'] for r in self._cache[resource]])
 
+    @task
     def provision(self):
         # Upload files
         if self._config.get('files'):
@@ -153,7 +167,7 @@ class Account(object):
                 self.delete_cronjob(line)
 
         # Execute system commands
-        if self._config.get('system'):
+        if self._run_system and self._config.get('system'):
             for cmd in self._config['system']:
                 self.system(cmd)
 

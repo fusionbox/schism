@@ -3,6 +3,8 @@
 import argparse
 
 from schism import Account
+from schism.account import valid_tasks
+from schism.exceptions import SchismError
 
 
 if __name__ == '__main__':
@@ -10,11 +12,34 @@ if __name__ == '__main__':
         description='Sets up and configures webfaction sites over xmlrpc.',
     )
     parser.add_argument(
-        'config_path',
+        '-c', '--config-path',
         help='path to configuration yaml file',
+        default='schism.yaml',
     )
-
+    parser.add_argument(
+        '-r', '--run-system',
+        help='run remote system commands',
+        action='store_true',
+    )
+    parser.add_argument(
+        'task',
+        metavar='TASK',
+        help='task to execute.  accepted values: {0}.'.format(
+            ', '.join(t.func_name for t in valid_tasks),
+        ),
+    )
     args = parser.parse_args()
 
-    account = Account(args.config_path)
-    account.provision()
+    account = Account(args.config_path, run_system=args.run_system)
+
+    # Validate and run task
+    task_error_message = 'Unknown task "{0}"'.format(args.task)
+    try:
+        task = getattr(account, args.task)
+    except AttributeError:
+        raise SchismError(task_error_message)
+
+    if task.im_func not in valid_tasks:
+        raise SchismError(task_error_message)
+    else:
+        task()
