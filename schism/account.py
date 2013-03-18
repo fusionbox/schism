@@ -32,14 +32,14 @@ def require_unique(or_do=None):
             # If resource name not unique, abort
             if not self._is_unique(resource, name):
                 log('{verbose_name} with name "{name}" already exists...'.format(
-                    verbose_name=verbose_name,
+                    verbose_name=verbose_name.capitalize(),
                     name=name,
                     ))
 
                 if or_do:
                     return or_do(self, *args, **kwargs)
                 else:
-                    log('skipping <!>\n')
+                    log('Skipping...\n')
                     return
 
             # Otherwise, run decorated function
@@ -70,10 +70,10 @@ class Account(object):
         account.
         """
         self._cache = {}
-        self._cache['app'] = log('detecting existing apps', self._server.list_apps)
-        self._cache['db'] = log('detecting existing databases', self._server.list_dbs)
-        self._cache['website'] = log('detecting existing websites', self._server.list_websites)
-        self._cache['domain'] = log('detecting existing domains', self._server.list_domains)
+        self._cache['app'] = log('Detecting existing apps', self._server.list_apps)
+        self._cache['db'] = log('Detecting existing databases', self._server.list_dbs)
+        self._cache['website'] = log('Detecting existing websites', self._server.list_websites)
+        self._cache['domain'] = log('Detecting existing domains', self._server.list_domains)
 
     def _is_unique(self, resource, name):
         """

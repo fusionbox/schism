@@ -7,7 +7,7 @@ def log(message, func=None, *args, **kwargs):
     the function with the given arguments and logs additional messages to
     indicate status.
     """
-    sys.stderr.write('{0}'.format(message.capitalize()))
+    sys.stderr.write(message)
 
     if func:
         sys.stderr.write('...')
