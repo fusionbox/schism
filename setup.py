@@ -1,5 +1,7 @@
 from setuptools import setup
 
+VERSION = '0.2'
+
 
 def readme():
     with open('README.rst') as f:
@@ -7,7 +9,7 @@ def readme():
 
 
 setup(name='schism',
-      version='0.1',
+      version=VERSION,
       description='Setup and configure webfaction sites over xmlrpc.',
       long_description=readme(),
       classifiers=[
