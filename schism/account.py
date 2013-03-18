@@ -12,6 +12,17 @@ from .utils import log
 
 CREATION_METHOD_RE = re.compile(r'^create_(.*)$')
 
+valid_tasks = []
+
+
+def task(fn):
+    """
+    Decorator adds function to an array of valid schism tasks for cli task
+    argument validation.
+    """
+    valid_tasks.append(fn)
+    return fn
+
 
 def require_unique(or_do=None):
     """
@@ -37,9 +48,10 @@ def require_unique(or_do=None):
                     ))
 
                 if or_do:
+                    log('\n')
                     return or_do(self, *args, **kwargs)
                 else:
-                    log('Skipping...\n')
+                    log('skipping...\n')
                     return
 
             # Otherwise, run decorated function
@@ -52,7 +64,9 @@ def require_unique(or_do=None):
 
 
 class Account(object):
-    def __init__(self, path):
+    def __init__(self, path, run_system=False):
+        self._run_system = run_system
+
         # Open and load yaml config
         with open(path, 'r') as f:
             c = yaml.load(f.read())
@@ -84,6 +98,7 @@ class Account(object):
         else:
             return not (name in [r['name'] for r in self._cache[resource]])
 
+    @task
     def provision(self):
         # Upload files
         if self._config.get('files'):
@@ -92,14 +107,14 @@ class Account(object):
 
         # Create domains
         if not self._config.get('domains'):
-            log('no domains specified...skipping <!>\n')
+            log('No domains specified...skipping\n')
         else:
             for domain in self._config['domains']:
                 self.create_domain(domain)
 
         # Create databases
         if not self._config.get('databases'):
-            log('no databases specified...skipping <!>\n')
+            log('No databases specified...skipping\n')
         else:
             for db_name, db_settings in self._config['databases'].iteritems():
                 settings = Settings(db_settings, name=db_name, resource='db')
@@ -111,7 +126,7 @@ class Account(object):
 
         # Create applications
         if not self._config.get('applications'):
-            log('no applications specified...skipping <!>\n')
+            log('No applications specified...skipping\n')
         else:
             for app_name, app_settings in self._config['applications'].iteritems():
                 settings = Settings(app_settings, name=app_name, resource='app')
@@ -122,7 +137,7 @@ class Account(object):
 
         # Create websites
         if not self._config.get('websites'):
-            log('no websites specified...skipping <!>\n')
+            log('No websites specified...skipping\n')
         else:
             for website_name, website_settings in self._config['websites'].iteritems():
                 settings = Settings(website_settings, name=website_name, resource='website')
@@ -152,7 +167,7 @@ class Account(object):
                 self.delete_cronjob(line)
 
         # Execute system commands
-        if self._config.get('system'):
+        if self._run_system and self._config.get('system'):
             for cmd in self._config['system']:
                 self.system(cmd)
 
@@ -173,12 +188,12 @@ class Account(object):
             if len(dir_path) == 2:
                 self._server.system('mkdir -p ~/{0}'.format(dir_path[0]))
         else:
-            if raw_input('Remote file ~/{0} already exists.  Overwrite?  (Y/n) '.format(remote_path)) != 'Y':
+            if raw_input('Remote file ~/{0} already exists. Overwrite? (Y/n) '.format(remote_path)) != 'Y':
                 log('skipping...\n')
                 return
 
         log(
-            'copying local:{local_path} -> webfaction:~/{remote_path} '.format(
+            'Copying local:{local_path} -> webfaction:~/{remote_path} '.format(
                 local_path=local_path,
                 remote_path=remote_path,
             ),
@@ -191,7 +206,7 @@ class Account(object):
     @require_unique()
     def create_domain(self, domain):
         log(
-            'creating "{domain}" domain'.format(domain=domain),
+            'Creating "{domain}" domain'.format(domain=domain),
             self._server.create_domain,
             domain,
         )
@@ -199,7 +214,7 @@ class Account(object):
     @require_unique()
     def create_db(self, name, type, password):
         log(
-            'creating "{name}" database with type "{type}"'.format(name=name, type=type),
+            'Creating "{name}" database with type "{type}"'.format(name=name, type=type),
             self._server.create_db,
             name,
             type,
@@ -209,7 +224,7 @@ class Account(object):
     @require_unique()
     def create_app(self, name, type, autostart=False):
         log(
-            'creating "{name}" application with type "{type}"'.format(name=name, type=type),
+            'Creating "{name}" application with type "{type}"'.format(name=name, type=type),
             self._server.create_app,
             name,
             type,
@@ -217,7 +232,7 @@ class Account(object):
 
     def update_website(self, name, ip, https, subdomains, site_apps=None):
         args = [
-            'updating "{name}" website'.format(name=name),
+            'Updating "{name}" website'.format(name=name),
             self._server.update_website,
             name,
             ip,
@@ -232,7 +247,7 @@ class Account(object):
     @require_unique(or_do=update_website)
     def create_website(self, name, ip, https, subdomains, site_apps=None):
         args = [
-            'creating "{name}" website'.format(name=name),
+            'Creating "{name}" website'.format(name=name),
             self._server.create_website,
             name,
             ip,
@@ -245,17 +260,18 @@ class Account(object):
         log(*args)
 
     def create_cronjob(self, line):
-        log('ensuring present in crontab:\n{line}\n'.format(line=line))
+        log('Ensuring present in crontab:\n{line}\n'.format(line=line))
         self._server.delete_cronjob(line)
         self._server.create_cronjob(line)
 
     def delete_cronjob(self, line):
-        log('purging from crontab:\n{line}\n'.format(line=line))
+        log('Purging from crontab:\n{line}\n'.format(line=line))
         self._server.delete_cronjob(line)
 
     def system(self, cmd):
         normalized = 'cd ~/ && {0}'.format(cmd)
 
-        log('executing: {cmd}\n'.format(cmd=cmd))
+        log('Executing: {cmd}\n'.format(cmd=cmd))
         out = self._server.system(normalized)
-        log('out: {out}\n'.format(out=out))
+        if out.strip():
+            log('Out: {out}\n'.format(out=out))
