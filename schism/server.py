@@ -14,7 +14,7 @@ class Server(object):
         self._username = username
         self._password = password
 
-        log('logging into webfaction', self._login)
+        log('Logging into webfaction', self._login)
 
     def _login(self):
         self._server = xmlrpclib.ServerProxy(self.WEBFACTION_API_URL)
