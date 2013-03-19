@@ -28,4 +28,9 @@ setup(name='schism',
       install_requires=[
           'pyyaml==3.10',
       ],
+      test_suite='nose.collector',
+      setup_requires=[
+          'nose==1.2.1',
+          'mock==1.0.1',
+      ],
       zip_safe=False)
