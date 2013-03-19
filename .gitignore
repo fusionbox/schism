@@ -1,2 +1,4 @@
 *.egg-info
+*.egg
 dist
+.b_hook
